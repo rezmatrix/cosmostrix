@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use crate::cell::Cell;
 
 #[derive(Clone, Debug)]
@@ -8,18 +10,22 @@ pub struct Frame {
 }
 
 impl Frame {
-    pub fn new(width: u16, height: u16) -> Self {
+    pub fn new(width: u16, height: u16, bg: Option<crossterm::style::Color>) -> Self {
         let len = width as usize * height as usize;
         Self {
             width,
             height,
-            cells: vec![Cell::blank(); len],
+            cells: vec![Cell::blank_with_bg(bg); len],
         }
     }
 
     pub fn clear(&mut self) {
+        self.clear_with_bg(None);
+    }
+
+    pub fn clear_with_bg(&mut self, bg: Option<crossterm::style::Color>) {
         for cell in &mut self.cells {
-            *cell = Cell::blank();
+            *cell = Cell::blank_with_bg(bg);
         }
     }
 

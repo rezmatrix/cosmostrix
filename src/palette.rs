@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use crossterm::style::Color;
 
 use crate::runtime::{ColorMode, ColorScheme, UserColors};
@@ -25,7 +27,15 @@ pub fn build_palette(
     default_background: bool,
     user: Option<&UserColors>,
 ) -> Palette {
-    let mut bg = if default_background { None } else { Some(Color::Black) };
+    let mut bg = if default_background {
+        None
+    } else {
+        Some(match mode {
+            ColorMode::Color16 => Color::Black,
+            ColorMode::TrueColor => Color::Rgb { r: 0, g: 0, b: 0 },
+            _ => Color::AnsiValue(16),
+        })
+    };
 
     let colors: Vec<Color> = match scheme {
         ColorScheme::User => {

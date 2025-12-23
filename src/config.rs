@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -99,4 +101,7 @@ pub struct Args {
 
     #[arg(long = "colormode")]
     pub colormode: Option<u16>,
+
+    #[arg(long = "info")]
+    pub info: bool,
 }

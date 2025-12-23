@@ -2,8 +2,17 @@
 name = "cosmostrix"
 version = "0.1.0"
 edition = "2021"
+authors = ["rezk_nightky"]
+description = "Terminal Matrix rain effect in Rust"
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
 crossterm = "0.27.0"
 rand = "0.8.5"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "unwind"
+strip = "symbols"

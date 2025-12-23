@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use std::io::{stdout, Result, Stdout, Write};
 
 use crossterm::{

@@ -1,164 +1,104 @@
 # Cosmostrix
 
-A cosmic take on the classic "Matrix rain" effect — rewritten for modern terminals in Rust.
+Cosmostrix is a terminal "Matrix rain" visualizer written in Rust.
 
-> A lightweight, configurable terminal visualizer that paints cascading characters across your terminal like cosmic rain.
+It is a clean-room Rust migration of an older ncurses-based terminal project.
 
-[![Crates.io](https://img.shields.io/badge/crates.io-none-lightgrey)](https://crates.io/) <!-- replace when published -->
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) <!-- update if different -->
-[![Rust](https://img.shields.io/badge/built%20with-rust-000000.svg)](https://www.rust-lang.org)
+## Build
 
-Table of contents
-- What is Cosmostrix?
-- Demo / Screenshots
-- Features
-- Installation
-- Usage
-- Configuration & Examples
-- Tips & Troubleshooting
-- Contributing
-- License
-- Acknowledgements
-
-What is Cosmostrix?
--------------------
-Cosmostrix is a small Rust-powered terminal program that recreates the cascading "Matrix" rain effect with a modern, customizable twist: color palettes, speed/density control, and terminal-friendly performance.
-
-It's ideal for:
-- Terminal backgrounds for streaming/screenshots
-- Ambient terminal visuals
-- Learning a bit of Rust + terminal rendering
-
-Demo / Screenshots
-------------------
-Include an animated GIF or a short video here for the best first impression.
-
-Example (static ASCII snapshot)
-
-    █▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█
-    █ █ █ █ █ █ █ █ █ █ █ █ █
-      ░░░░░░░░░░░░░░░░░░░░░
-
-(Replace the above with an actual GIF or link to demo in the repo's `assets/` directory or Releases.)
-
-Features
---------
-- Minimal, fast, and terminal-native (no GUI).
-- Rust-based for safety and performance.
-- Configurable speed, density, and palettes.
-- Works in most modern terminals that support ANSI colors.
-- Low CPU usage — suitable for background visuals.
-
-Installation
-------------
-Binary builds may be available under Releases. If a release is not present, you can build from source.
-
-From a release (recommended when available)
-1. Download the appropriate release for your OS from the Releases page.
-2. Extract and move the binary to a directory in your PATH, for example `/usr/local/bin/`.
-
-Build from source (requires Rust toolchain)
 ```bash
-# Install Rust toolchain if you don't have it:
-# https://rustup.rs
-git clone https://github.com/oxyzenQ/cosmostrix.git
-cd cosmostrix
 cargo build --release
-# Binary will be at:
-# target/release/cosmostrix
+./target/release/cosmostrix --help
 ```
 
-Install via cargo (if published to crates.io)
-```bash
-cargo install --git https://github.com/oxyzenQ/cosmostrix.git --bin cosmostrix
-```
+## Installation
 
-Usage
------
-Run the binary from your terminal:
+Cosmostrix is intended for Unix-like systems (Linux, BSD, macOS, and similar).
+
+### From source
 
 ```bash
-cosmostrix
+cargo build --release
+install -Dm755 ./target/release/cosmostrix ~/.local/bin/cosmostrix
 ```
 
-Most terminal programs support a `--help` flag. If available, run:
+### From GitHub Releases
+
+Download the `.tar.xz` archive for your OS/arch from Releases, extract it, and place `cosmostrix` somewhere in your `PATH`.
+
+## Run
 
 ```bash
-cosmostrix --help
+cargo run -- --color green --fps 60 --speed 10
 ```
 
-Common usage patterns
-- Run in full-screen terminal for maximum effect.
-- Pipe into a multiplexer (tmux, screen) session to keep it running.
-- Use `ctrl+c` to stop (or the terminal's normal interrupt).
+Cosmostrix runs in **alternate screen** and **raw mode**.
 
-Configuration & Examples
-------------------------
-Cosmostrix aims to be simple and unobtrusive. You can customize how the rain looks and behaves.
+## CLI options
 
-Suggested configuration options (check `--help` for exact flags / names):
-- speed: How fast the characters fall.
-- density: How many falling columns are active.
-- palette/theme: Choose colors (classic green, neon, pastel, etc).
-- charset: Which characters to display (ASCII, Unicode, custom string).
+These flags match the current Rust implementation (`src/config.rs`).
 
-Example (hypothetical; check the real CLI flags):
-```bash
-# Faster, denser, classic green palette
-cosmostrix --speed 1.5 --density 0.9 --palette classic
+```text
+ -a, --async                  enable async column speeds
+ -b, --bold <NUM>             0=off, 1=random, 2=all
+ -C, --colorfile <FILE>       load user colors from file (legacy-compatible format)
+ -c, --color <COLOR>          color scheme (default: green)
+ -D, --defaultbg              use terminal default background color
+ -d, --density <NUM>          droplet density (default: 1.0)
+ -F, --fullwidth              use two columns per character
+ -f, --fps <NUM>              target FPS (default: 60)
+ -g, --glitchms <LO,HI>       glitch timing range in ms (default: 300,400)
+ -G, --glitchpct <PCT>        glitch chance percent (default: 10)
+ -l, --lingerms <LO,HI>       linger timing range in ms (default: 1,3000)
+ -M, --shadingmode <NUM>      0=random, 1=distance-from-head (default: 0)
+ -m, --message <TEXT>         overlay message
+     --maxdpc <NUM>           max droplets per column (default: 3)
+     --noglitch               disable glitch
+ -r, --rippct <PCT>           die-early percent (default: 33.33333)
+ -S, --speed <NUM>            chars per second (default: 8)
+ -s, --screensaver            exit on first keypress
+     --shortpct <PCT>         short droplet percent (default: 50)
+     --charset <NAME>         character set (default: auto)
+     --chars <HEX...>         custom unicode hex ranges (pairs)
+     --colormode <MODE>       force color mode (0, 16, 256, 32)
 ```
 
-Example config file (TOML)
-```toml
-# ~/.config/cosmostrix/config.toml
-speed = 1.0
-density = 0.6
-palette = "classic"
-charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+### Color schemes
+
+`--color` supports:
+
+`user`, `green`, `green2`, `green3`, `gold`, `yellow`, `orange`, `red`, `blue`, `cyan`, `purple`, `pink`, `pink2`, `vaporwave`, `gray`, `rainbow`
+
+If `--colorfile` is provided, Cosmostrix automatically switches to `user` color scheme.
+
+### Background
+
+By default Cosmostrix draws with an explicit black background.
+
+If you want it to use your terminal theme background, pass `--defaultbg`.
+
+## Runtime controls (keys)
+
+Controls are handled in `src/main.rs`:
+
+```text
+ Esc / q      quit
+ Space        reset
+ a            toggle async mode
+ p            pause/unpause
+ Up/Down      change speed
+ Left/Right   change glitch percent
+ Tab          toggle shading mode
+ - / +        change density
+
+ 1..0 ! @ # $ %   switch color schemes
 ```
 
-If configuration file support is available, place it in:
-- Linux/macOS: `~/.config/cosmostrix/config.toml`
-- Windows: `%APPDATA%\cosmostrix\config.toml`
+## Reference folder
 
-Tips & Troubleshooting
-----------------------
-- If colors look off, ensure your terminal supports at least 256 colors or truecolor.
-- If performance is poor, try reducing density and/or speed.
-- Use a compositor or terminal emulator that supports hardware-accelerated rendering for smoother visuals.
-- If the program doesn't run: make sure the binary is executable (`chmod +x cosmostrix`) and that dependencies were built successfully.
+`reference/` contains an older version of the project kept for comparison during migration.
 
-Contributing
-------------
-Contributions are welcome!
+## Notes
 
-If you'd like to help:
-1. Open an issue to discuss major changes or features.
-2. Fork the repo and create a branch for your feature/fix.
-3. Make small, focused pull requests and include tests where appropriate.
-4. Follow the existing coding style and add documentation for new features.
-
-Suggested areas to help:
-- Add more palettes/themes.
-- Add unit/integration tests for rendering logic.
-- Improve CLI ergonomics and add config-file support (if missing).
-- Add Windows terminal-specific fixes or enhancements.
-
-License
--------
-This project is provided under the MIT license. See the LICENSE file for details. (Update this section if a different license applies.)
-
-Acknowledgements
-----------------
-- Inspiration: The classic "Matrix" rain screensavers and terminal art.
-- Built with Rust and terminal libraries — thank you to the maintainers of those crates.
-
-Contact / Maintainer
---------------------
-- Maintained by oxyzenQ
-- Repo: https://github.com/oxyzenQ/cosmostrix
-
-If you'd like, I can:
-- Flesh out examples using the actual CLI flags (run `cosmostrix --help` in your repo or tell me the exact options).
-- Add a copy-ready GIF or screenshot section if you provide an image or release URL.
-- Draft a CONTRIBUTING.md with more specific development and testing steps.
+- **Terminal compatibility**: best results in modern terminals with 256-color or truecolor support.
+- **UTF-8**: Cosmostrix can use Unicode character sets depending on your locale and `--charset`.

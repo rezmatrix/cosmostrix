@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use std::time::{Duration, Instant};
 
 use crossterm::style::Color;
@@ -391,8 +393,10 @@ impl Cloud {
         self.droplets.clear();
         self.droplets.resize_with(self.num_droplets, Droplet::new);
 
-        self.rand_line = Uniform::new_inclusive(0, lines.saturating_sub(2));
-        self.rand_len = Uniform::new_inclusive(1, lines.saturating_sub(2));
+        let max_line = lines.saturating_sub(2);
+        let max_len = max_line.max(1);
+        self.rand_line = Uniform::new_inclusive(0, max_line);
+        self.rand_len = Uniform::new_inclusive(1, max_len);
         self.rand_col = Uniform::new_inclusive(0, cols.saturating_sub(1));
         self.rand_cpidx = Uniform::new_inclusive(0, 2047);
 
@@ -826,7 +830,7 @@ impl Cloud {
         self.spawn_droplets(now);
 
         if self.force_draw_everything {
-            frame.clear();
+            frame.clear_with_bg(self.palette.bg);
         }
 
         let time_for_glitch = self.time_for_glitch(now);

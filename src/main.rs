@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 mod cell;
 mod charset;
 mod cloud;
@@ -121,6 +123,13 @@ fn parse_user_colors(path: &std::path::Path) -> std::result::Result<UserColors, 
 fn main() -> std::io::Result<()> {
     let args = Args::parse();
 
+    if args.info {
+        println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        println!("author: {}", env!("CARGO_PKG_AUTHORS"));
+        println!("{}", env!("CARGO_PKG_DESCRIPTION"));
+        return Ok(());
+    }
+
     let def_ascii = default_to_ascii();
     let color_mode = detect_color_mode(&args);
 
@@ -220,7 +229,7 @@ fn main() -> std::io::Result<()> {
         cloud.set_message(msg);
     }
 
-    let mut frame = Frame::new(w, h);
+    let mut frame = Frame::new(w, h, cloud.palette.bg);
 
     let target_fps = args.fps.max(1.0);
     let target_period = Duration::from_secs_f64(1.0 / target_fps);
@@ -232,8 +241,8 @@ fn main() -> std::io::Result<()> {
             let ev = Terminal::read_event()?;
             match ev {
                 Event::Resize(nw, nh) => {
-                    frame = Frame::new(nw, nh);
                     cloud.reset(nw, nh);
+                    frame = Frame::new(nw, nh, cloud.palette.bg);
                     cloud.force_draw_everything();
                 }
                 Event::Key(k) if k.kind == KeyEventKind::Press => {

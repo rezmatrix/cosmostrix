@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use crossterm::style::Color;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -14,6 +16,15 @@ impl Cell {
             ch: ' ',
             fg: None,
             bg: None,
+            bold: false,
+        }
+    }
+
+    pub fn blank_with_bg(bg: Option<Color>) -> Self {
+        Self {
+            ch: ' ',
+            fg: None,
+            bg,
             bold: false,
         }
     }

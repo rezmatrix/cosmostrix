@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use std::char;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

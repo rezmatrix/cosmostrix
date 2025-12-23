@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 use std::time::{Duration, Instant};
 
 use crate::cloud::{CharLoc, DrawCtx};
@@ -21,6 +23,8 @@ pub struct Droplet {
     pub length: u16,
     pub chars_per_sec: f32,
 
+    pub advance_remainder: f32,
+
     pub last_time: Option<Instant>,
     pub head_stop_time: Option<Instant>,
     pub time_to_linger: Duration,
@@ -41,6 +45,9 @@ impl Droplet {
             char_pool_idx: u16::MAX,
             length: u16::MAX,
             chars_per_sec: 0.0,
+
+            advance_remainder: 0.0,
+
             last_time: None,
             head_stop_time: None,
             time_to_linger: Duration::from_millis(0),
@@ -55,6 +62,7 @@ impl Droplet {
         self.is_alive = true;
         self.is_head_crawling = true;
         self.is_tail_crawling = true;
+        self.advance_remainder = 0.0;
         self.last_time = Some(now);
     }
 
@@ -75,8 +83,13 @@ impl Droplet {
 
         let elapsed = now.saturating_duration_since(last);
         let elapsed_sec = elapsed.as_secs_f32();
-        let chars_advanced = (self.chars_per_sec * elapsed_sec).round() as u16;
+        let delta = (self.chars_per_sec * elapsed_sec).max(0.0);
+        let total = self.advance_remainder + delta;
+        let whole = total.floor();
+        self.advance_remainder = total - whole;
+        let chars_advanced = whole as u16;
         if chars_advanced == 0 {
+            self.last_time = Some(now);
             return false;
         }
 

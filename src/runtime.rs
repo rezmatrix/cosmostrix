@@ -1,3 +1,5 @@
+// Copyright (c) 2025 rezk_nightky
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ColorMode {
     Mono,
